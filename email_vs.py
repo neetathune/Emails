@@ -1,13 +1,24 @@
+import streamlit as st
+
+st.title("🎈 My new app")
+
+st.write(
+    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
+)
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+
+
+
 import os
 import json
-
-with open('config.json') as config_file:
-    config = json.load(config_file)
+config_file = st.file_uploader("Choose a file")
+config = json.load(config_file)
+#with open('config.json') as config_file:
+   
 
 # Access the credentials
 #sender_email  = config['email_user']
