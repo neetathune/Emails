@@ -1,83 +1,56 @@
 import streamlit as st
-
-st.title("🎈 My new app")
-
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
 import smtplib
-from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
-
-
-
 import os
-import json
-config_file = st.file_uploader("Choose a file")
-config = json.load(config_file)
-#with open('config.json') as config_file:
-   
 
-# Access the credentials
-#sender_email  = config['email_user']
-#password  = config['email_pass']
-recipients = [
-    "deepanshugoyal509@gmail.com"
-]
-sender_email = config['email_user']
-subject = "Subject of the Email"
-body = """
-Hello,
-
-This is a test email sent from Python script.
-
-Best regards,
-Deepanshu Goyal
-"""
-smtp_server = "smtp.gmail.com"
-port = 587  # For starttls
-def send_email(recipient_email,sender_email,config,subject,body,attachment_path=None):
+# Function to send email with attachment
+def send_email(sender_email, receiver_email, subject, message, smtp_server, smtp_port, login, password, attachment=None):
     try:
-        # Create the email message
         msg = MIMEMultipart()
-        msg['From'] = config['email_user']
-        msg['To'] = recipient_email
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
         msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-        
-       # Add an attachment if provided
 
-        if attachment_path:
-            filename = os.path.basename(attachment_path)
-            with open(attachment_path, 'rb') as attachment:
-                part = MIMEBase('application', 'octet-stream')
-                part.set_payload(attachment.read())
-                encoders.encode_base64(part)
-                part.add_header(
-                    'Content-Disposition',
-                    f'attachment; filename={filename}',
-                )
-                msg.attach(part)
-                
-        # Connect to the server
-        server = smtplib.SMTP(smtp_server, port)
-        server.starttls()  # Secure the connection
-        server.login(config['email_user'], config['email_pass'])
+        msg.attach(MIMEText(message, 'plain'))
 
-        # Send the email
-        server.sendmail(sender_email, recipient_email, msg.as_string())
+        # Attach the file
+        if attachment:
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(attachment.read())
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', f"attachment; filename= {attachment.name}")
+            msg.attach(part)
 
-        # Disconnect from the server
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(login, password)
+        text = msg.as_string()
+        server.sendmail(sender_email, receiver_email, text)
         server.quit()
 
-        print(f"Email successfully sent to {recipient_email}")
-        
+        return "Email sent successfully!"
     except Exception as e:
-        print(f"Error sending email to {recipient_email}: {e}")
+        return str(e)
 
-attachment_path = r"E:\Workoopolis pdf &excel\PythonProject-3  Projects  using Python.docx"
+# Streamlit app
+st.title('Email Sender App with Attachment')
 
-for recipient in recipients:
-    send_email(recipient,sender_email,config,subject,body,attachment_path)
+st.sidebar.header('Email Configuration')
+smtp_server = st.sidebar.text_input('SMTP Server', 'smtp.gmail.com')
+smtp_port = st.sidebar.number_input('SMTP Port', 587)
+login = st.sidebar.text_input('Login Email')
+password = st.sidebar.text_input('Password', type='password')
+
+st.header('Compose Email')
+sender_email = st.text_input('Sender Email', login)
+receiver_email = st.text_input('Receiver Email')
+subject = st.text_input('Subject')
+message = st.text_area('Message')
+attachment = st.file_uploader("Choose a file", type=["txt", "pdf", "png", "jpg", "jpeg", "gif", "docx", "xlsx"])
+
+if st.button('Send Email'):
+    result = send_email(sender_email, receiver_email, subject, message, smtp_server, smtp_port, login, password, attachment)
+    st.write(result)
