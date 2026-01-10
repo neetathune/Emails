@@ -1,6 +1,6 @@
 import streamlit as st
 import smtplib
-from email.mime.text import MIMEText
+from email.mime.text import MIMEText  #Multipurpose Internet Mail Extension (MIME) Protocol
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
@@ -53,4 +53,5 @@ attachment = st.file_uploader("Choose a file", type=["txt", "pdf", "png", "jpg",
 
 if st.button('Send Email'):
     result = send_email(sender_email, receiver_email, subject, message, smtp_server, smtp_port, login, password, attachment)
+
     st.write(result)
