@@ -55,3 +55,4 @@ if st.button('Send Email'):
     result = send_email(sender_email, receiver_email, subject, message, smtp_server, smtp_port, login, password, attachment)
 
     st.write(result)
+
